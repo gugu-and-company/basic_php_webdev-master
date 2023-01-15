@@ -3,62 +3,78 @@
 
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="style.css">
-  <title>Document</title>
-
+  <link rel="stylesheet" href="style.css" type="text/css">
 </head>
 
 <body>
+
   <?php
+  require_once('./Post.php');
 
+  $POSTS_FILE_NAME = "./posts.json";
 
-  $file = "data.json";
-  $json = file_get_contents($file); //指定したファイルの要素をすべて取得する
-  // echo "---------------------------<br>";
-  // print_r($json);
-  // echo "<br>";
-  // echo "---------------------------<br>";
+  $posts;
+  $message = "";
+  $error_message = "";
 
-  $posts = json_decode($json, true); //json形式のデータを連想配列の形式にする
-  // echo "---------------------------<br>";
-  // print_r($posts);
-  // echo "<br>";
-  // echo "---------------------------<br>";
+  if (file_exists($POSTS_FILE_NAME)) {
 
-  foreach ($posts as $post) {
-    echo "<div class ='card'>";
-    echo "<div class ='dttm'>" . $post["date"] . "</br></div>";
-    echo "<div class ='post'>" . $post["post"] . "</br></div>";
-    echo "</div>";
+    // Postクラスの配列を取得する
+    $posts = readPostsFromJson($POSTS_FILE_NAME);
+
+    $message = "Read Posts from JSON file data.";
+  } else {
+
+    $error_message = "JSON file Not found.";
   }
 
-
-
-
-  // $user_data = array(
-  //             'name' => $user['name'],
-  //             'age' => $user['age'],
-  //             'language' => $user['language']
-  //         );
-
-
-  // require_once('Post.php');
-
-  // $posts[0] = new Post('500万人突破するまで生配信！！！');
-  // $posts[1] = new Post('頼む！行かないでくれ！');
-  // $posts[2] = new Post('登録即解除とかしたらどうなるん');
-  // $posts[3] = new Post('お前らは大嫌いだろうけど素直に凄いわ');
-
-  // for ($i = 0; $i <= count($posts) - 1; $i++) {
-  //   echo "<div class ='card'>";
-  //   echo "<div class ='dttm'>" . $posts[$i]->dttm . "</br></div>";
-  //   echo "<div class ='post'>" . $posts[$i]->post . "</br></div>";
-  //   echo "</div>";
-  // }
   ?>
-  <h3>以上がポストです</h3>
+
+  <? if ($error_message) : ?>
+    <h3 class='text-danger'><?= $error_message ?></h3>
+  <? else : ?>
+    <h3 class='text-success'><?= $message ?></h3>
+    <?php foreach ($posts as $post) : ?>
+      <div class='card'>
+        <div class='dttm'> <?= $post->getDatetime(); ?> </div>
+        <div class='post'> <?= $post->getPost(); ?> </div>
+      </div>
+    <?php endforeach; ?>
+  <? endif; ?>
+
+  <?php
+
+  function readPostsFromJson($path)
+  {
+    // data read from json file
+    $data = file_get_contents($path);
+    // debug
+    // echo "---raw json--------------------<br>";
+    // print_r($data);
+    // echo "<br>";
+    // echo "-------------------------------<br>";
+
+    // decode a data
+    $json = json_decode($data); // Objectとしてdecode
+    // debug
+    // echo "---decode json-----------------<br>";
+    // print_r($json);
+    // echo "<br>";
+    // echo "-------------------------------<br>";
+
+    $posts = array();
+    foreach ($json as $post) {
+      // echo $post->datetime . "<br>";
+      // echo $post->post . "<br>";
+      $post = new Post($post->datetime, $post->post);
+      array_push($posts, $post);
+    }
+
+    return $posts;
+  }
+
+  ?>
+
 </body>
 
 </html>
