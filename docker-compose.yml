@@ -5,6 +5,6 @@ services:
   php:
     build: ./php
     ports:
-      - 6969:8000
+      - 80:8000
     volumes:
       - ./work:/work
